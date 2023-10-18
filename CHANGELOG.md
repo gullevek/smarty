@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Added support for PHP8.2
+- Added a new way to extend Smarty functionality using `Smarty::addExtension()` or `Smarty::setExtensions()`. Please see the docs for more information.
+- Custom tags can accept positional parameters, so you can write a block compiler that support this: `{trans "Jack" "dull boy"}All work and no play makes %s a %s.{/trans}` [#164](https://github.com/smarty-php/smarty/issues/164)
+- Full support for ternary operator: `{$test ? $a : $b}` and `{$var ?: $value_if_falsy}` [#881](https://github.com/smarty-php/smarty/issues/881)
+- Full support for null coalescing operator: `{$var ?? $value_if_null}` [#882](https://github.com/smarty-php/smarty/issues/882)
 
 ### Changed
 - All Smarty code is now in the \Smarty namespace. For simple use-cases, you only need to add
@@ -17,11 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Template variable scope bubbling has been simplified and made more consistent. 
   The global scope now equals the Smarty scope in order to avoid global state side effects. Please read
   the documentation for more details.
-- Lexers and Parsers PHP files are no longer under version control, but generated from sources (.y and .plex) 
+- Lexers and Parsers PHP files are reliably generated from sources (.y and .plex) using the make file 
 - Smarty now always runs in multibyte mode, using `symfony/polyfill-mbstring` if required. Please use the
   multibyte extension for optimal performance.
 - Smarty no longer calls `mb_internal_encoding()` and doesn't check for deprecated `mbstring.func_overload` ini directive [#480](https://github.com/smarty-php/smarty/issues/480)
 - Generated `<script>` tags lo longer have deprecated `type="text/javascript"` or `language="Javascript"` attributes [#815](https://github.com/smarty-php/smarty/issues/815)
+- Smarty will throw a compiler exception insteadd of silently ignoring a modifier on a function call, like this: `{include|dot:"x-template-id" file="included.dot.tpl"}` [#526](https://github.com/smarty-php/smarty/issues/526) 
+- The documentation was largely rewritten
 
 ### Deprecated
 - `$smarty->getPluginsDir()`
@@ -29,7 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `$smarty->setPluginsDir()`
 - `$smarty->assignGlobal()`
 - Using `$smarty->registerFilter()` for registering variable filters will trigger a notice.
-- 
 
 ### Removed
 - Dropped support for PHP7.1
@@ -42,8 +47,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed support for loading config files into a non-local scope using `{config_load}` from a template 
 - Removed `$smarty->autoload_filters` in favor of `$smarty->registerFilter()`
 - Removed `$smarty->trusted_dir` and `$smarty->allow_php_templates` since support for executing php scripts from templates has been dropped  
-- Removed `$smarty->php_functions` and `$smarty->php_modifiers`. If you need a PHP-function in your templates,
-  register it as a modifier.
+- Removed `$smarty->php_functions` and `$smarty->php_modifiers`. 
+- You can no longer use native PHP-functions or userland functions in your templates without registering them. If you need a function in your templates,
+  register it first.
 - Removed support for `$smarty->getTags()`
 - Removed the abandoned `$smarty->direct_access_security` setting
 - Dropped support for `$smarty->plugins_dir` and `$smarty->use_include_path`. If you must, use `$smarty->addPluginsDir()` instead,
@@ -55,7 +61,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed `$smarty->loadPlugin()`, use `$smarty->registerPlugin()` instead.
 - Removed `$smarty->appendByRef()` and `$smarty->assignByRef()`.
 - Removed `$smarty->_current_file`
-- Removed `$smarty->allow_ambiguous_resources`, but ambiguous resources handlers should still work
+- Removed `$smarty->allow_ambiguous_resources` (ambiguous resources handlers should still work)
+
+### Fixed
+- `|strip_tags` does not work if the input is 0 [#890](https://github.com/smarty-php/smarty/issues/890)
+
+## [4.3.2] - 2023-07-19
+
+### Fixed
+- `$smarty->muteUndefinedOrNullWarnings()` now also mutes PHP8 warnings for undefined properties
+
+## [4.3.1] - 2023-03-28
+
+### Security
+- Fixed Cross site scripting vulnerability in Javascript escaping. This addresses CVE-2023-28447.
 
 ### Fixed
 - `$smarty->muteUndefinedOrNullWarnings()` now also mutes PHP7 notices for undefined array indexes [#736](https://github.com/smarty-php/smarty/issues/736)

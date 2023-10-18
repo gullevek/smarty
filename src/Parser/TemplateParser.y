@@ -617,6 +617,11 @@ expr(res)        ::= value(v). {
     res = v;
 }
 
+                 // nullcoalescing
+expr(res)        ::= nullcoalescing(v). {
+    res = v;
+}
+
                  // ternary
 expr(res)        ::= ternary(v). {
     res = v;
@@ -668,16 +673,29 @@ expr(res)        ::= expr(e1) ISIN value(v).  {
     res = 'in_array('.e1.',(array)'.v.')';
 }
 
+// null coalescing
+nullcoalescing(res)        ::= expr(v) QMARK QMARK expr(e2). {
+    res = v.' ?? '.e2;
+}
 
 //
 // ternary
 //
-ternary(res)        ::= OPENP expr(v) CLOSEP  QMARK DOLLARID(e1) COLON  expr(e2). {
+ternary(res)        ::= expr(v) QMARK DOLLARID(e1) COLON  expr(e2). {
     res = v.' ? '. $this->compiler->compileVariable('\''.substr(e1,1).'\'') . ' : '.e2;
 }
 
-ternary(res)        ::= OPENP expr(v) CLOSEP  QMARK  expr(e1) COLON  expr(e2). {
+ternary(res)        ::= expr(v) QMARK value(e1) COLON expr(e2). {
     res = v.' ? '.e1.' : '.e2;
+}
+
+ternary(res)        ::= expr(v) QMARK expr(e1) COLON expr(e2). {
+    res = v.' ? '.e1.' : '.e2;
+}
+
+// shorthand ternary
+ternary(res)        ::= expr(v) QMARK COLON expr(e2). {
+    res = v.' ?: '.e2;
 }
 
                  // value
